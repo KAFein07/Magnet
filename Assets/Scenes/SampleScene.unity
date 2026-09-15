@@ -225,7 +225,7 @@ Transform:
   m_GameObject: {fileID: 117972268}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 11.38, z: 0}
+  m_LocalPosition: {x: 0, y: 11.38, z: -15.4}
   m_LocalScale: {x: 1, y: 1, z: 20}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -600,13 +600,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 614859521}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 6.27, z: -9.66}
+  m_LocalRotation: {x: 0.6951008, y: -0, z: -0, w: 0.71891236}
+  m_LocalPosition: {x: 0, y: 2.16, z: -5.43}
   m_LocalScale: {x: 1, y: 1, z: 20}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 88.071, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,13 +908,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1795418132}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 6.27, z: 9.7}
+  m_LocalRotation: {x: 0.7015502, y: 0.0049245567, z: 0.018709479, w: 0.71235746}
+  m_LocalPosition: {x: -0.000000009917497, y: 6.27, z: 9.7}
   m_LocalScale: {x: 1, y: 1, z: 20}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 92.10602, y: -115.132, z: -114.015}
 --- !u!1001 &2424284606486611720
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -965,7 +965,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4182891241839185949, guid: a864e8e7a33f80e4293d3e0a79271912, type: 3}
       propertyPath: coolSpeed
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4182891241839185949, guid: a864e8e7a33f80e4293d3e0a79271912, type: 3}
       propertyPath: heatSpeed
@@ -982,6 +982,10 @@ PrefabInstance:
     - target: {fileID: 4182891241839185949, guid: a864e8e7a33f80e4293d3e0a79271912, type: 3}
       propertyPath: switchRepulsionForce
       value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 4182891241839185949, guid: a864e8e7a33f80e4293d3e0a79271912, type: 3}
+      propertyPath: switchRepulsionDuration
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 5710427395486290759, guid: a864e8e7a33f80e4293d3e0a79271912, type: 3}
       propertyPath: m_Constraints

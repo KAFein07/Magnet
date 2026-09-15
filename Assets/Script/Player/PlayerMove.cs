@@ -519,17 +519,18 @@ public class PlayerMove : MonoBehaviour
         // •Ç‚ÖŒü‚©‚¤‘¬“x‚¾‚¯Á‚·
         // ------------------------------------
 
-        Vector3 velocity =
-            rb.linearVelocity;
+        //š•Ç‚Ö‚Ì‹z‚¢‚Â‚«•û‚ª•s©‘R‚È‚Ì‚ÅÁ‚·
+        //Vector3 velocity =
+        //    rb.linearVelocity;
 
-        velocity -=
-            Vector3.Project(
-                velocity,
-                -surfaceNormal
-            );
+        //velocity -=
+        //    Vector3.Project(
+        //        velocity,
+        //        -surfaceNormal
+        //    );
 
-        rb.linearVelocity =
-            velocity;
+        //rb.linearVelocity =
+        //    velocity;
     }
 
     // ========================================

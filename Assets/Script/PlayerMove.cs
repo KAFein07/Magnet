@@ -28,6 +28,12 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float coolSpeed = 20f;
     // 電磁石OFF時に温度が下がる速さ
 
+    [SerializeField] private float ceilingMaxTemperature = 70f;
+    // この温度以上では天井に吸着できない
+
+    [SerializeField] private float wallMaxTemperature = 90f;
+    // この温度以上では壁にも吸着できない
+
     [Header("磁力")]
     [SerializeField] private float magneticRange = 3f;
     // 磁力が届く範囲
@@ -119,6 +125,9 @@ public class PlayerMove : MonoBehaviour
     // 地面判定
     private bool isGrounded = false;
 
+    // 再吸着を一時的に禁止する時間
+    private float attachCooldown = 0f;
+
 
     // =========================
     // 外部公開
@@ -169,13 +178,66 @@ public class PlayerMove : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // =========================
+        // 再吸着禁止時間
+        // =========================
+
+        if (attachCooldown > 0f)
+        {
+            attachCooldown -= Time.fixedDeltaTime;
+        }
+
+
+        // =========================
         // 温度
+        // =========================
+
         HandleTemperature();
 
+
+        // =========================
+        // 温度による吸着解除
+        // =========================
+
+        if (isAttached)
+        {
+            // 天井
+            if (surfaceNormal.y < -0.7f &&
+                temperature >= ceilingMaxTemperature)
+            {
+                ReleaseFromSurface();
+
+                // しばらく再吸着できないようにする
+                attachCooldown = 0.5f;
+
+                Debug.Log(ceilingMaxTemperature+ "℃以上になったため、天井から落下！");
+            }
+
+            // 壁
+            else if (Mathf.Abs(surfaceNormal.y) <= 0.7f &&
+                     temperature >= wallMaxTemperature)
+            {
+                ReleaseFromSurface();
+
+                // しばらく再吸着できないようにする
+                attachCooldown = 0.5f;
+
+                Debug.Log(wallMaxTemperature+ "℃以上になったため、壁から落下！");
+            }
+        }
+
+
+        // =========================
         // 極変更時の反発
+        // =========================
+
         HandleSwitchRepulsion();
 
+
+        // =========================
         // 磁力
+        // =========================
+
         if (magnetEnabled)
         {
             HandleMagnetism();
@@ -185,7 +247,11 @@ public class PlayerMove : MonoBehaviour
             ReleaseFromSurface();
         }
 
+
+        // =========================
         // 移動
+        // =========================
+
         if (isAttached)
         {
             MoveOnSurface();
@@ -195,10 +261,18 @@ public class PlayerMove : MonoBehaviour
             MoveNormal();
         }
 
+
+        // =========================
         // アニメーション
+        // =========================
+
         UpdateAnimation();
 
+
+        // =========================
         // 電磁石の見た目
+        // =========================
+
         UpdateElectromagnetVisual();
     }
 
@@ -374,11 +448,18 @@ public class PlayerMove : MonoBehaviour
 
     private void HandleMagnetism()
     {
+        // 再吸着禁止中
+        if (attachCooldown > 0f)
+        {
+            return;
+        }
+
         Collider[] nearbyRocks =
             Physics.OverlapSphere(
                 transform.position,
                 magneticRange
             );
+
 
         float closestDistance =
             Mathf.Infinity;
@@ -518,11 +599,48 @@ public class PlayerMove : MonoBehaviour
         if (normal == Vector3.zero)
             return;
 
+
+        // =========================
         // 地面には吸着しない
+        // =========================
+
         if (normal.y > 0.7f)
         {
             return;
         }
+
+
+        // =========================
+        // 天井の温度制限
+        // =========================
+
+        // 70℃以上なら天井に吸着できない
+        if (normal.y < -0.7f)
+        {
+            if (temperature >= ceilingMaxTemperature)
+            {
+                return;
+            }
+        }
+
+
+        // =========================
+        // 壁の温度制限
+        // =========================
+
+        // 90℃以上なら壁に吸着できない
+        else
+        {
+            if (temperature >= wallMaxTemperature)
+            {
+                return;
+            }
+        }
+
+
+        // =========================
+        // 吸着
+        // =========================
 
         attachedRock = rock;
 
@@ -530,7 +648,6 @@ public class PlayerMove : MonoBehaviour
 
         isAttached = true;
     }
-
 
     // =========================
     // 吸着中の移動
@@ -546,31 +663,69 @@ public class PlayerMove : MonoBehaviour
 
         Vector3 normal = surfaceNormal;
 
-        Vector3 surfaceUp =
-            Vector3.ProjectOnPlane(
-                Vector3.up,
-                normal
-            ).normalized;
+        // =========================
+        // 天井かどうか判定
+        // =========================
 
-        if (surfaceUp == Vector3.zero)
+        bool isCeiling = normal.y < -0.7f;
+
+        // =========================
+        // 壁・天井に沿った移動方向
+        // =========================
+
+        Vector3 surfaceRight;
+        Vector3 surfaceUp;
+
+        if (isCeiling)
         {
+            // ---------------------------------
+            // 天井
+            // ---------------------------------
+            // A/D → Z方向
+            // W/S → Z方向とは別の横方向
+            //
+            // Xは使わないゲームなので、
+            // 天井ではZ方向を基本の移動方向にする
+
+            surfaceRight = Vector3.forward;
+
+            surfaceUp = Vector3.right;
+        }
+        else
+        {
+            // ---------------------------------
+            // 壁
+            // ---------------------------------
+
             surfaceUp =
                 Vector3.ProjectOnPlane(
-                    Vector3.forward,
+                    Vector3.up,
+                    normal
+                ).normalized;
+
+            if (surfaceUp == Vector3.zero)
+            {
+                surfaceUp = Vector3.up;
+            }
+
+            surfaceRight =
+                Vector3.Cross(
+                    surfaceUp,
                     normal
                 ).normalized;
         }
 
-        Vector3 surfaceRight =
-            Vector3.Cross(
-                surfaceUp,
-                normal
-            ).normalized;
+        // =========================
+        // A/Dの速度
+        // =========================
 
-        // A/Dは弱める
         float horizontalSpeed =
             wallMoveSpeed *
             wallHorizontalSpeedMultiplier;
+
+        // =========================
+        // 移動速度
+        // =========================
 
         Vector3 targetVelocity =
             surfaceRight *
@@ -580,6 +735,10 @@ public class PlayerMove : MonoBehaviour
             surfaceUp *
             moveInput.y *
             wallMoveSpeed;
+
+        // =========================
+        // 岩にめり込まないように
+        // =========================
 
         Vector3 normalVelocity =
             Vector3.Project(
@@ -591,7 +750,10 @@ public class PlayerMove : MonoBehaviour
             targetVelocity +
             normalVelocity;
 
+        // =========================
         // 吸着力
+        // =========================
+
         float stickForce =
             magneticForce *
             MagnetStrength;

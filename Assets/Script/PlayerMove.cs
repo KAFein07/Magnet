@@ -44,6 +44,9 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float repulsionForce = 50f;
     // 同じ極の岩から受ける反発力
 
+    [Header("壁の接触判定")]
+    [SerializeField] private float surfaceCheckDistance = 1.5f;
+
     [Header("吸着移動")]
     [SerializeField] private float wallMoveSpeed = 4f;
     // 壁や天井に吸着しているときの基本移動速度
@@ -199,18 +202,33 @@ public class PlayerMove : MonoBehaviour
         // 温度による吸着解除
         // =========================
 
+        // =========================
+        // 温度による吸着解除
+        // =========================
+
         if (isAttached)
         {
+            // 壁から離れたかチェック
+            if (!IsStillTouchingSurface())
+            {
+                ReleaseFromSurface();
+
+                Debug.Log("壁から離れたため吸着解除！");
+            }
+
             // 天井
-            if (surfaceNormal.y < -0.7f &&
-                temperature >= ceilingMaxTemperature)
+            else if (surfaceNormal.y < -0.7f &&
+                     temperature >= ceilingMaxTemperature)
             {
                 ReleaseFromSurface();
 
                 // しばらく再吸着できないようにする
                 attachCooldown = 0.5f;
 
-                Debug.Log(ceilingMaxTemperature+ "℃以上になったため、天井から落下！");
+                Debug.Log(
+                    ceilingMaxTemperature +
+                    "℃以上になったため、天井から落下！"
+                );
             }
 
             // 壁
@@ -222,7 +240,10 @@ public class PlayerMove : MonoBehaviour
                 // しばらく再吸着できないようにする
                 attachCooldown = 0.5f;
 
-                Debug.Log(wallMaxTemperature+ "℃以上になったため、壁から落下！");
+                Debug.Log(
+                    wallMaxTemperature +
+                    "℃以上になったため、壁から落下！"
+                );
             }
         }
 
@@ -1043,5 +1064,34 @@ public class PlayerMove : MonoBehaviour
                 surfaceNormal
             );
         }
+    }
+
+    private float cameraZoomInput = 0f;
+
+    public void OnCameraZoom(InputValue value)
+    {
+        Vector2 input = value.Get<Vector2>();
+        cameraZoomInput += input.y;
+    }
+
+    public float ConsumeCameraZoom()
+    {
+        float value = cameraZoomInput;
+        cameraZoomInput = 0f;
+        return value;
+    }
+
+    private bool IsStillTouchingSurface()
+    {
+        if (attachedRock == null)
+            return false;
+
+        Vector3 closestPoint =
+            attachedRock.ClosestPoint(transform.position);
+
+        float distance =
+            Vector3.Distance(transform.position, closestPoint);
+
+        return distance <= surfaceCheckDistance;
     }
 }

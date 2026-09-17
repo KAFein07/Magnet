@@ -10,14 +10,11 @@ public class PlayerUI : MonoBehaviour
     [Header("温度ゲージ")]
     [SerializeField] private Image temperatureGauge;
 
-    [Header("温度表示")]
-    [SerializeField] private TMP_Text temperatureText;
-
     [Header("磁力ON/OFF")]
-    [SerializeField] private TMP_Text magnetText;
+    [SerializeField] private Image magnetImage;
 
     [Header("極")]
-    [SerializeField] private TMP_Text poleText;
+    [SerializeField] private Image poleImage;
 
     private void FixedUpdate()
     {
@@ -46,42 +43,35 @@ public class PlayerUI : MonoBehaviour
             temperatureGauge.fillAmount =
                 fillAmount;
         }
-
-        // 温度の数字を更新
-        if (temperatureText != null)
-        {
-            temperatureText.text =
-                Mathf.RoundToInt(temperature) + "°C";
-        }
     }
 
     private void UpdateMagnetStatus()
     {
-        if (magnetText == null)
+        if (magnetImage == null)
             return;
 
         if (player.MagnetEnabled)
         {
-            magnetText.text = "MAGNET ON";
+            magnetImage.enabled = true;
         }
         else
         {
-            magnetText.text = "MAGNET OFF";
+            magnetImage.enabled = false;
         }
     }
 
     private void UpdatePoleStatus()
     {
-        if (poleText == null)
+        if (poleImage == null)
             return;
 
         if (player.IsNorthPole)
         {
-            poleText.text = "N POLE";
+            poleImage.enabled = true;
         }
         else
         {
-            poleText.text = "S POLE";
+            poleImage.enabled = false;
         }
     }
 }

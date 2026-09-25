@@ -10,13 +10,16 @@ public class BackgroundImageFollow : MonoBehaviour
 
     [SerializeField] private Vector3 targetPosition;
 
-    private float startPlayerY;
-    private Vector3 startPosition;
+    
+    [SerializeField] private float startPlayerY;
+    [SerializeField] private Vector3 startPosition;
+
+    
 
     private void Start()
     {
-        startPlayerY = player.position.y;
-        startPosition = transform.localPosition;
+        //startPlayerY = player.position.y;
+        //startPosition = transform.localPosition;
     }
 
     private void FixedUpdate()

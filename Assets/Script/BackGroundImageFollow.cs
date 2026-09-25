@@ -8,6 +8,8 @@ public class BackgroundImageFollow : MonoBehaviour
     [Header("’Ç]")]
     [SerializeField] private float followRate = 0.3f;
 
+    [SerializeField] private Vector3 targetPosition;
+
     private float startPlayerY;
     private Vector3 startPosition;
 
@@ -25,7 +27,7 @@ public class BackgroundImageFollow : MonoBehaviour
         float playerY =
             player.position.y - startPlayerY;
 
-        Vector3 targetPosition = startPosition;
+        targetPosition = startPosition;
 
         // ƒvƒŒƒCƒ„[‚Ìã¸—Ê‚Ìˆê•”‚¾‚¯”wŒi‚ğ“®‚©‚·
         targetPosition.y -= playerY * followRate;

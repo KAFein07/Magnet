@@ -111,6 +111,8 @@ public class PlayerMove : MonoBehaviour
 
     [SerializeField] private float lightRange = 3f;
     // Œõ‚ª“Í‚­‹——£
+
+    [SerializeField] private GameTimer gameTimer;
     private Rigidbody rb;
 
     private Vector2 moveInput;
@@ -304,6 +306,8 @@ public class PlayerMove : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
+        StartGameTimer();
+
         moveInput = value.Get<Vector2>();
     }
 
@@ -312,6 +316,8 @@ public class PlayerMove : MonoBehaviour
     {
         if (!value.isPressed)
             return;
+
+        StartGameTimer();
 
         // ‹z’…’†‚È‚ç‹É•ÏX‚É”½”­
         if (isAttached && attachedRock != null)
@@ -400,6 +406,9 @@ public class PlayerMove : MonoBehaviour
     {
         if (!value.isPressed)
             return;
+
+        StartGameTimer();
+
 
         magnetEnabled = !magnetEnabled;
 
@@ -1093,5 +1102,13 @@ public class PlayerMove : MonoBehaviour
             Vector3.Distance(transform.position, closestPoint);
 
         return distance <= surfaceCheckDistance;
+    }
+
+    private void StartGameTimer()
+    {
+        if (gameTimer != null)
+        {
+            gameTimer.StartTimer();
+        }
     }
 }

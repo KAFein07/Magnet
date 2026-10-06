@@ -113,6 +113,21 @@ public class PlayerMove : MonoBehaviour
     // 光が届く距離
 
     [SerializeField] private GameTimer gameTimer;
+
+    [Header("チュートリアル")]
+    [SerializeField] private TutorialManager tutorialManager;
+
+    // =========================
+    // チュートリアル
+    // =========================
+
+    private bool tutorialMode = false;
+
+    private bool allowHorizontalMove = true;
+    private bool allowVerticalMove = true;
+    private bool allowSwitchPole = true;
+    private bool allowMagnetToggle = true;
+
     private Rigidbody rb;
 
     private Vector2 moveInput;
@@ -306,16 +321,56 @@ public class PlayerMove : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        StartGameTimer();
 
-        moveInput = value.Get<Vector2>();
+        Vector2 input = value.Get<Vector2>();
+
+        // A / D
+        if (!allowHorizontalMove)
+        {
+            input.x = 0f;
+        }
+
+        // W / S
+        if (!allowVerticalMove)
+        {
+            input.y = 0f;
+        }
+
+        // 入力を保存
+        moveInput = input;
+
+        // A / D が入力されたことをチュートリアルへ通知
+        if (input.x != 0f && tutorialManager != null)
+        {
+            tutorialManager.OnADInput();
+        }
+
+        if (input.y != 0f && tutorialManager != null)
+        {
+            tutorialManager.OnWSInput();
+        }
+
+        // 実際に入力があったらタイマー開始
+        if (input != Vector2.zero)
+        {
+            StartGameTimer();
+        }
     }
 
 
     public void OnSwitchPole(InputValue value)
     {
+        if (!allowSwitchPole)
+            return;
+
         if (!value.isPressed)
             return;
+
+        // チュートリアルへ右クリックを通知
+        if (tutorialManager != null)
+        {
+            tutorialManager.OnRightClick();
+        }
 
         StartGameTimer();
 
@@ -406,6 +461,17 @@ public class PlayerMove : MonoBehaviour
     {
         if (!value.isPressed)
             return;
+
+        // チュートリアルへ左クリックを通知
+        if (tutorialManager != null)
+        {
+            tutorialManager.OnLeftClick();
+        }
+
+        if (!allowMagnetToggle)
+            return;
+
+
 
         StartGameTimer();
 
@@ -1111,4 +1177,36 @@ public class PlayerMove : MonoBehaviour
             gameTimer.StartTimer();
         }
     }
+
+    // =========================
+    // チュートリアル用
+    // =========================
+
+    public void SetTutorialMode(bool enabled)
+    {
+        tutorialMode = enabled;
+    }
+
+    public void SetInputPermission(
+    bool horizontalMove,
+    bool verticalMove,
+    bool switchPole,
+    bool magnetToggle)
+    {
+        allowHorizontalMove = horizontalMove;
+        allowVerticalMove = verticalMove;
+        allowSwitchPole = switchPole;
+        allowMagnetToggle = magnetToggle;　
+    }
+
+    // =========================
+    // チュートリアル用
+    // =========================
+
+    public bool HasHorizontalInput()
+    {
+        return Mathf.Abs(moveInput.x) > 0.01f;
+    }
+
+    
 }

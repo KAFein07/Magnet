@@ -8,6 +8,7 @@ public class GameTimer : MonoBehaviour
 
     private float elapsedTime = 0f;
     private bool timerStarted = false;
+    public float ElapsedTime => elapsedTime;
 
     private void FixedUpdate()
     {
@@ -18,6 +19,13 @@ public class GameTimer : MonoBehaviour
 
         UpdateTimerText();
     }
+    public void SetElapsedTime(float time)
+    {
+        elapsedTime = time;
+        timerStarted = true;
+
+        UpdateTimerText();
+    }
 
     public void StartTimer()
     {
@@ -25,6 +33,14 @@ public class GameTimer : MonoBehaviour
             return;
 
         timerStarted = true;
+    }
+
+    public void ResetTimer()//タイマーリセット(初期化)
+    {
+        elapsedTime = 0f;
+        timerStarted = false;
+
+        UpdateTimerText();
     }
 
     private void UpdateTimerText()

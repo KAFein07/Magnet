@@ -7,8 +7,25 @@ public class GameStartManager : MonoBehaviour
     [Header("チュートリアル")]
     [SerializeField] private Toggle tutorialToggle;
 
+    [Header("続きから")]
+    [SerializeField] private GameObject continueButton;
+
+    private GameSaveManager saveManager;
+
+    private const string SaveKey = "GameSaveData";
+
     public static bool IsTutorialEnabled { get; private set; }
     public static bool IsContinue { get; private set; }
+
+    private void Start()
+    {
+        if (continueButton != null)
+        {
+            continueButton.SetActive(
+                PlayerPrefs.HasKey(SaveKey)
+            );
+        }
+    }
 
     public void StartGame()
     {

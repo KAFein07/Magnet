@@ -6,7 +6,7 @@ AudioMixerGroupController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BGMVolume
+  m_Name: BGM
   m_AudioMixer: {fileID: 24100000}
   m_GroupID: 37dcce0c9d2e6bb4ea701f3fc61e2ce2
   m_Children: []
@@ -36,9 +36,9 @@ AudioMixerController:
   m_UpdateMode: 0
   m_ExposedParameters:
   - guid: 171596b21972ca54b879fa07e63a7cb6
-    name: MyExposedParam
+    name: BGMVolume
   - guid: 0149c540abad1ff479b854bce74ef8bf
-    name: MyExposedParam 1
+    name: SEVolume
   m_AudioMixerGroupViews:
   - guids:
     - 167a29cc8928f9c43bfb39c48f3095e7
@@ -93,6 +93,7 @@ AudioMixerSnapshotController:
   m_SnapshotID: 63bbc279b3cc18242a5b2f3f3cbfc9f9
   m_FloatValues:
     171596b21972ca54b879fa07e63a7cb6: 0
+    91dd90c57a556734ab8448ce20d81877: 1
   m_TransitionOverrides: {}
 --- !u!244 &3610774541812398026
 AudioMixerEffectController:
@@ -114,7 +115,7 @@ AudioMixerGroupController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SEVolume
+  m_Name: SE
   m_AudioMixer: {fileID: 24100000}
   m_GroupID: 686f58a9b8940504bbd52c08e1790db5
   m_Children: []

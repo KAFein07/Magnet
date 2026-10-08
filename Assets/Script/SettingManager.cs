@@ -19,11 +19,30 @@ public class SettingManager : MonoBehaviour
 
     private void Start()
     {
-        // Å‰‚Íİ’è‰æ–Ê‚ğ•Â‚¶‚é
+        // İ’è‰æ–Ê‚ğ•Â‚¶‚é
         if (settingPanel != null)
         {
             settingPanel.SetActive(false);
         }
+
+        // •Û‘¶‚³‚ê‚Ä‚¢‚é‰¹—Ê‚ğ“Ç‚İ‚Ş
+        float bgmVolume = PlayerPrefs.GetFloat("BGMVolume", 1f);
+        float seVolume = PlayerPrefs.GetFloat("SEVolume", 1f);
+
+        // Slider‚É”½‰f
+        if (bgmSlider != null)
+        {
+            bgmSlider.value = bgmVolume;
+        }
+
+        if (seSlider != null)
+        {
+            seSlider.value = seVolume;
+        }
+
+        // AudioMixer‚É‚à”½‰f
+        SetBGMVolume(bgmVolume);
+        SetSEVolume(seVolume);
     }
 
     public void OnPause(InputValue value)
@@ -57,14 +76,27 @@ public class SettingManager : MonoBehaviour
 
     public void SetBGMVolume(float value)
     {
-        audioMixer.SetFloat("BGMVolume", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20f);
+        audioMixer.SetFloat(
+            "BGMVolume",
+            Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20f
+        );
+
+        // ‰¹—Êİ’è‚ğ•Û‘¶
+        PlayerPrefs.SetFloat("BGMVolume", value);
+        PlayerPrefs.Save();
     }
 
     public void SetSEVolume(float value)
     {
-        audioMixer.SetFloat("SEVolume", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20f);
-    }
+        audioMixer.SetFloat(
+            "SEVolume",
+            Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20f
+        );
 
+        // ‰¹—Êİ’è‚ğ•Û‘¶
+        PlayerPrefs.SetFloat("SEVolume", value);
+        PlayerPrefs.Save();
+    }
     public void ReturnToTitle()
     {
         // Œ»İ‚ÌƒQ[ƒ€‚ğƒZ[ƒu

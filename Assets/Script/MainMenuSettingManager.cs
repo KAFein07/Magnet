@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class MainMenuSettingManager : MonoBehaviour
 {
@@ -8,15 +9,63 @@ public class MainMenuSettingManager : MonoBehaviour
     [Header("削除確認")]
     [SerializeField] private GameObject deleteConfirmPanel;
 
+    [Header("続きから")]
+    [SerializeField] private GameObject continueButton;
+
+    [Header("音量")]
+    [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private UnityEngine.UI.Slider bgmSlider;
+    [SerializeField] private UnityEngine.UI.Slider seSlider;
+
 
 
     private void Start()
     {
-        // 削除確認画面は最初は非表示
-        if (deleteConfirmPanel != null)
+        // 設定画面を閉じる
+        if (settingPanel != null)
         {
-            deleteConfirmPanel.SetActive(false);
+            settingPanel.SetActive(false);
         }
+
+        // 保存されている音量を読み込む
+        float bgmVolume = PlayerPrefs.GetFloat("BGMVolume", 1f);
+        float seVolume = PlayerPrefs.GetFloat("SEVolume", 1f);
+
+        if (bgmSlider != null)
+        {
+            bgmSlider.value = bgmVolume;
+        }
+
+        if (seSlider != null)
+        {
+            seSlider.value = seVolume;
+        }
+
+        SetBGMVolume(bgmVolume);
+        SetSEVolume(seVolume);
+    }
+
+    public void SetBGMVolume(float value)
+    {
+        audioMixer.SetFloat(
+            "BGMVolume",
+            Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20f
+        );
+        Debug.Log("BGMVolume :" + value);
+        PlayerPrefs.SetFloat("BGMVolume", value);
+        PlayerPrefs.Save();
+    }
+
+    public void SetSEVolume(float value)
+    {
+        audioMixer.SetFloat(
+            "SEVolume",
+            Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20f
+        );
+        Debug.Log("SEVolume :" + value);
+
+        PlayerPrefs.SetFloat("SEVolume", value);
+        PlayerPrefs.Save();
     }
 
 
@@ -41,6 +90,11 @@ public class MainMenuSettingManager : MonoBehaviour
         if (deleteConfirmPanel != null)
         {
             deleteConfirmPanel.SetActive(false);
+        }
+        // 削除確認画面は最初は非表示
+        if (continueButton != null)
+        {
+            continueButton.SetActive(false);
         }
 
         Debug.Log("セーブデータを削除しました！");

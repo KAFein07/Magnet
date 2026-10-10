@@ -32,6 +32,14 @@ public class RankingManager : MonoBehaviour
         if (rankingPanel != null)
         {
             rankingPanel.SetActive(isRankingOpen);
+            if (isRankingOpen)
+            {
+                AudioManager.Instance.PlayDecisionSE();
+            }
+            else
+            {
+                AudioManager.Instance.PlayCancelSE();
+            }
         }
     }
 

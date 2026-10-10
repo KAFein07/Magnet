@@ -74,18 +74,19 @@ public class MainMenuSettingManager : MonoBehaviour
     {
         if (deleteConfirmPanel != null)
         {
+            AudioManager.Instance.PlayDecisionSE();
             deleteConfirmPanel.SetActive(true);
         }
     }
 
 
     // 「はい」ボタン
-    // 「はい」ボタン
     public void DeleteSaveData()
     {
         PlayerPrefs.DeleteKey("GameSaveData");
         PlayerPrefs.Save();
 
+        AudioManager.Instance.PlayDecisionSE();
         // 確認画面を閉じる
         if (deleteConfirmPanel != null)
         {
@@ -106,6 +107,7 @@ public class MainMenuSettingManager : MonoBehaviour
     {
         if (deleteConfirmPanel != null)
         {
+            AudioManager.Instance.PlayCancelSE();
             deleteConfirmPanel.SetActive(false);
         }
     }
@@ -114,6 +116,7 @@ public class MainMenuSettingManager : MonoBehaviour
     {
         if (settingPanel != null)
         {
+            AudioManager.Instance.PlayDecisionSE();
             settingPanel.SetActive(true);
         }
     }
@@ -123,7 +126,15 @@ public class MainMenuSettingManager : MonoBehaviour
     {
         if (settingPanel != null)
         {
+            AudioManager.Instance.PlayCancelSE();
             settingPanel.SetActive(false);
         }
+    }
+
+    public void ExitGame()
+    {
+        
+        // ゲームを終了
+        Application.Quit();
     }
 }

@@ -36,8 +36,13 @@ public class GameStartManager : MonoBehaviour
 
         // 新規ゲーム
         IsContinue = false;
-
+        AudioManager.Instance.PlayDecisionSE2();
         SceneManager.LoadScene("InGame");
+    }
+
+    public void Toggle()
+    {
+        AudioManager.Instance.PlaySwitchSE();
     }
 
     public void ContinueGame()
@@ -46,6 +51,7 @@ public class GameStartManager : MonoBehaviour
         IsContinue = true;
 
         // 続きからの場合はセーブデータ側で判断する
+        AudioManager.Instance.PlayDecisionSE2();
         SceneManager.LoadScene("InGame");
     }
 }

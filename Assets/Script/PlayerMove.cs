@@ -198,6 +198,7 @@ public class PlayerMove : MonoBehaviour
 
     private void FixedUpdate()
     {
+        AudioManager.Instance.UpdateWindByHeight(transform.position.y);
         // =========================
         // Ä‹z’…‹Ö~ŠÔ
         // =========================
@@ -372,6 +373,8 @@ public class PlayerMove : MonoBehaviour
             tutorialManager.OnRightClick();
         }
 
+        AudioManager.Instance.PlaySwitchSE();
+
         StartGameTimer();
 
         // ‹z’…’†‚È‚ç‹É•ÏX‚É”½”­
@@ -471,7 +474,7 @@ public class PlayerMove : MonoBehaviour
         if (!allowMagnetToggle)
             return;
 
-
+        AudioManager.Instance.PlayDecisionSE();
 
         StartGameTimer();
 

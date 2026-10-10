@@ -41,6 +41,7 @@ public class GameClearManager : MonoBehaviour
 
     public void ReturnToTitle()
     {
+        AudioManager.Instance.PlayClearSE();
         // “ü—Í‚³‚ê‚½ƒvƒŒƒCƒ„[–¼‚ğæ“¾
         string playerName = "";
 

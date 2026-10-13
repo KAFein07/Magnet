@@ -29,6 +29,7 @@ public class GameClearManager : MonoBehaviour
 
 
     private bool isCleared = false;
+    private bool SendRank = false;
 
     private void Start()
     {
@@ -41,6 +42,9 @@ public class GameClearManager : MonoBehaviour
 
     public void ReturnToTitle()
     {
+        if (SendRank)
+            return;
+        SendRank = true;
         AudioManager.Instance.PlayClearSE();
         // 入力されたプレイヤー名を取得
         string playerName = "";
@@ -75,6 +79,7 @@ public class GameClearManager : MonoBehaviour
         if (isCleared)
             return;
 
+        SendRank=false;
         isCleared = true;
         // クリアしたので、続きから用のセーブデータを削除
         PlayerPrefs.DeleteKey("GameSaveData");
@@ -90,7 +95,6 @@ public class GameClearManager : MonoBehaviour
             clearTime = gameTimer.ElapsedTime;
         }
 
-       // StartCoroutine(SendRanking(clearTime));
 
 
 

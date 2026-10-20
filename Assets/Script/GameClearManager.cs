@@ -31,6 +31,25 @@ public class GameClearManager : MonoBehaviour
     private bool isCleared = false;
     private bool SendRank = false;
 
+    private const string TrophyKey = "PlayerTrophyCount";
+
+    // 所持トロフィー数
+    public static int TrophyCount
+    {
+        get { return PlayerPrefs.GetInt(TrophyKey, 0); }
+    }
+
+    // トロフィーを1個獲得
+    private void AddTrophy()
+    {
+        int count = TrophyCount + 1;
+
+        PlayerPrefs.SetInt(TrophyKey, count);
+        PlayerPrefs.Save();
+
+        Debug.Log("トロフィー獲得！ 所持数：" + count);
+    }
+
     private void Start()
     {
         // 最初はリザルト画面を非表示
@@ -81,6 +100,8 @@ public class GameClearManager : MonoBehaviour
 
         SendRank=false;
         isCleared = true;
+
+        AddTrophy();
         // クリアしたので、続きから用のセーブデータを削除
         PlayerPrefs.DeleteKey("GameSaveData");
         PlayerPrefs.Save();
@@ -127,6 +148,26 @@ public class GameClearManager : MonoBehaviour
         Debug.Log("ゲームクリア！");
         Debug.Log("クリアタイム：" + clearTime);
     }
+
+
+    public static bool TrySpendTrophies(int amount)
+    {
+        if (amount < 0)
+            return false;
+
+        int currentCount = TrophyCount;
+
+        // 所持数が足りなければ購入できない
+        if (currentCount < amount)
+            return false;
+
+        // トロフィーを消費して保存
+        PlayerPrefs.SetInt(TrophyKey, currentCount - amount);
+        PlayerPrefs.Save();
+
+        return true;
+    }
+
 
     private IEnumerator SendRanking(string playerName, float clearTime)
     {
@@ -182,6 +223,8 @@ public class GameClearManager : MonoBehaviour
             SceneManager.LoadScene("Title");
         }
     }
+
+
 
     [System.Serializable]
     private class RankingData

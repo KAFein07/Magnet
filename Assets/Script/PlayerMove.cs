@@ -198,7 +198,8 @@ public class PlayerMove : MonoBehaviour
 
     private void FixedUpdate()
     {
-        AudioManager.Instance.UpdateWindByHeight(transform.position.y);
+        if(AudioManager.Instance)
+            AudioManager.Instance.UpdateWindByHeight(transform.position.y);
         // =========================
         // çƒãzíÖã÷é~éûä‘
         // =========================
@@ -373,7 +374,8 @@ public class PlayerMove : MonoBehaviour
             tutorialManager.OnRightClick();
         }
 
-        AudioManager.Instance.PlaySwitchSE();
+        if (AudioManager.Instance)
+            AudioManager.Instance.PlaySwitchSE();
 
         StartGameTimer();
 
@@ -474,7 +476,8 @@ public class PlayerMove : MonoBehaviour
         if (!allowMagnetToggle)
             return;
 
-        AudioManager.Instance.PlayDecisionSE();
+        if (AudioManager.Instance)
+            AudioManager.Instance.PlayDecisionSE();
 
         StartGameTimer();
 

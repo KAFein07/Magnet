@@ -6,6 +6,12 @@ public class MainMenuSettingManager : MonoBehaviour
     [Header("設定画面")]
     [SerializeField] private GameObject settingPanel;
 
+    [Header("ショップ")]
+    [SerializeField] private GameObject shopPanel;
+    [SerializeField] private TMPro.TMP_Text trophyCountText;
+
+    private bool isShopOpen = false;
+
     [Header("削除確認")]
     [SerializeField] private GameObject deleteConfirmPanel;
 
@@ -26,6 +32,13 @@ public class MainMenuSettingManager : MonoBehaviour
         {
             settingPanel.SetActive(false);
         }
+
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(false);
+        }
+
+        UpdateTrophyCount();
 
         // 保存されている音量を読み込む
         float bgmVolume = PlayerPrefs.GetFloat("BGMVolume", 1f);
@@ -136,5 +149,39 @@ public class MainMenuSettingManager : MonoBehaviour
         
         // ゲームを終了
         Application.Quit();
+    }
+
+    // ショップ画面を開閉
+    public void ToggleShop()
+    {
+        isShopOpen = !isShopOpen;
+
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(isShopOpen);
+        }
+
+        UpdateTrophyCount();
+    }
+
+    // ショップ画面の閉じるボタン用
+    public void CloseShop()
+    {
+        isShopOpen = false;
+
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(false);
+        }
+    }
+
+    // 所持トロフィー数を表示
+    public void UpdateTrophyCount()
+    {
+        if (trophyCountText == null)
+            return;
+
+        trophyCountText.text =
+            "" + GameClearManager.TrophyCount;
     }
 }

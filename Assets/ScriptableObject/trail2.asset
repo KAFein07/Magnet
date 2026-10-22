@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ccaa9f6122f0e64aa051067dee9c80a, type: 3}
+  m_Name: trail2
+  m_EditorClassIdentifier: Assembly-CSharp::EffectData
+  effectId: 2
+  effectName: BlueTrail
+  trophyCost: 1
+  icon: {fileID: 21300000, guid: 5347e7f6f3b8c7e489b9c8bc772a8580, type: 3}
+  particlePrefab: {fileID: 0}
+  trailPrefab: {fileID: 2013714794020847450, guid: 3902dd7684968cc48bc1c108ef097119, type: 3}

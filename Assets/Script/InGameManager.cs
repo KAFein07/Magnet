@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class InGameManager : MonoBehaviour
 {
@@ -14,8 +15,41 @@ public class InGameManager : MonoBehaviour
     [Header("セーブ")]
     [SerializeField] private GameSaveManager saveManager;
 
+    [Header("使用可能なエフェクト")]
+    [SerializeField]
+    private List<EffectData> effects = new List<EffectData>();
+
+    private const string EquippedKey = "EquippedEffect";
+
+    private PlayerMove playerMove;
+
+    private void Awake()
+    {
+        // プレイヤーの移動スクリプトを取得
+        if (player != null)
+        {
+            playerMove = player.GetComponent<PlayerMove>();
+
+            if (playerMove == null)
+            {
+                Debug.LogError(
+                    "プレイヤーにPlayerMoveが見つかりません。"
+                );
+            }
+        }
+        else
+        {
+            Debug.LogError(
+                "InGameManagerのPlayer参照が設定されていません。"
+            );
+        }
+    }
+
     private void Start()
     {
+        // チュートリアルでも装備を反映
+        ApplyEquippedEffect();
+
         if (GameStartManager.IsTutorialEnabled)
             return;
 
@@ -28,41 +62,34 @@ public class InGameManager : MonoBehaviour
         StartNormalGame();
     }
 
-    private void StartNewGame()
+    // 保存されている装備エフェクトをプレイヤーに適用
+    public void ApplyEquippedEffect()
     {
-        Debug.Log("新しくゲーム開始");
+        if (playerMove == null)
+            return;
 
-        if (GameStartManager.IsTutorialEnabled)
-        {
-            StartTutorial();
-        }
-        else
-        {
-            StartNormalGame();
-        }
+        string equippedId =
+            PlayerPrefs.GetString(EquippedKey, "");
+
+        EffectData data = effects.Find(effect =>
+            effect != null &&
+            effect.effectId == equippedId
+        );
+
+        playerMove.SetEffect(data);
     }
 
-    private void ContinueGame()
-    {
-        Debug.Log("続きから開始");
-
-        // セーブデータを読み込む
-    }
-
-    private void StartTutorial()
-    {
-        Debug.Log("チュートリアル開始");
-
-        // チュートリアル処理
-    }
-
+    // 通常ゲームを開始
     public void StartNormalGame()
     {
         Debug.Log("通常ゲーム開始");
+
+        ApplyEquippedEffect();
         ResetPlayer();
         ResetGameTimer();
-        // 通常ゲーム処理
     }
+
+    // プレイヤーを開始位置に戻す
     private void ResetPlayer()
     {
         if (player == null || playerStartPoint == null)
@@ -72,6 +99,7 @@ public class InGameManager : MonoBehaviour
         player.rotation = playerStartPoint.rotation;
     }
 
+    // タイマーをリセット
     private void ResetGameTimer()
     {
         if (gameTimer == null)
@@ -80,6 +108,7 @@ public class InGameManager : MonoBehaviour
         gameTimer.ResetTimer();
     }
 
+    // ゲームを保存
     public void SaveGame()
     {
         if (saveManager == null)
@@ -88,6 +117,7 @@ public class InGameManager : MonoBehaviour
         saveManager.SaveGame(player, gameTimer);
     }
 
+    // セーブデータから再開
     private void LoadSavedGame()
     {
         if (saveManager == null || !saveManager.HasSaveData())
@@ -105,14 +135,23 @@ public class InGameManager : MonoBehaviour
         }
 
         // プレイヤー座標を復元
-        player.position = new Vector3(
-            data.playerX,
-            data.playerY,
-            data.playerZ
-        );
+        if (player != null)
+        {
+            player.position = new Vector3(
+                data.playerX,
+                data.playerY,
+                data.playerZ
+            );
+        }
 
         // タイマーを復元
-        gameTimer.SetElapsedTime(data.elapsedTime);
+        if (gameTimer != null)
+        {
+            gameTimer.SetElapsedTime(data.elapsedTime);
+        }
+
+        // 再開時にも装備を反映
+        ApplyEquippedEffect();
 
         Debug.Log("保存データからゲームを再開しました！");
     }

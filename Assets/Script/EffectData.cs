@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 [CreateAssetMenu(
@@ -11,13 +10,15 @@ public class EffectData : ScriptableObject
     public string effectId;
     public string effectName;
 
-    [TextArea]
-    public string description;
 
     [Header("ショップ")]
     public int trophyCost = 1;
     public Sprite icon;
 
     [Header("ゲーム内エフェクト")]
-    public GameObject effectPrefab;
+    [Tooltip("Particle Systemを使う場合に設定")]
+    public ParticleSystem particlePrefab;
+
+    [Tooltip("Trail Rendererを使う場合に設定")]
+    public TrailRenderer trailPrefab;
 }

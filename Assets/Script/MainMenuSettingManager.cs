@@ -182,6 +182,8 @@ public class MainMenuSettingManager : MonoBehaviour
             return;
 
         trophyCountText.text =
-            "" + GameClearManager.TrophyCount;
+    TrophyManager.TrophyCount.ToString();
     }
+
+
 }

@@ -132,6 +132,14 @@ public class PlayerMove : MonoBehaviour
 
     private Vector2 moveInput;
 
+    // 装備中エフェクトの参照
+    private ParticleSystem currentParticleSystem;
+    private TrailRenderer currentTrailRenderer;
+
+    // この速度以上なら移動中とみなす
+    [Header("エフェクト再生設定")]
+    [SerializeField] private float effectMoveThreshold = 0.15f;
+
     private bool isAttached = false;
 
     private Vector3 surfaceNormal;
@@ -196,9 +204,46 @@ public class PlayerMove : MonoBehaviour
     // 物理更新
     // =========================
 
+    private void Update()
+    {
+        UpdateMovementEffect();
+    }
+
+    // 実際の移動速度に応じてエフェクトを再生・停止する
+    private void UpdateMovementEffect()
+    {
+        if (rb == null)
+            return;
+
+        bool isMoving = rb.linearVelocity.sqrMagnitude >
+                        effectMoveThreshold * effectMoveThreshold;
+
+        if (currentParticleSystem != null)
+        {
+            if (isMoving)
+            {
+                if (!currentParticleSystem.isPlaying)
+                    currentParticleSystem.Play(true);
+            }
+            else if (currentParticleSystem.isPlaying)
+            {
+                // 新しい粒子の発生だけを止め、出ている粒子は残す
+                currentParticleSystem.Stop(
+                    true,
+                    ParticleSystemStopBehavior.StopEmitting
+                );
+            }
+        }
+
+        if (currentTrailRenderer != null)
+        {
+            currentTrailRenderer.emitting = isMoving;
+        }
+    }
+
     private void FixedUpdate()
     {
-        if(AudioManager.Instance)
+        if (AudioManager.Instance)
             AudioManager.Instance.UpdateWindByHeight(transform.position.y);
         // =========================
         // 再吸着禁止時間
@@ -1202,7 +1247,7 @@ public class PlayerMove : MonoBehaviour
         allowHorizontalMove = horizontalMove;
         allowVerticalMove = verticalMove;
         allowSwitchPole = switchPole;
-        allowMagnetToggle = magnetToggle;　
+        allowMagnetToggle = magnetToggle;
     }
 
     // =========================
@@ -1214,5 +1259,83 @@ public class PlayerMove : MonoBehaviour
         return Mathf.Abs(moveInput.x) > 0.01f;
     }
 
-    
+    [Header("装備中のエフェクト")]
+    [SerializeField] private Transform effectAttachPoint;
+
+    private GameObject currentEffectObject;
+
+    // 装備中のエフェクトを変更する
+    public void SetEffect(EffectData effectData)
+    {
+        // 前のエフェクトを削除
+        if (currentEffectObject != null)
+        {
+            Destroy(currentEffectObject);
+            currentEffectObject = null;
+        }
+
+        currentParticleSystem = null;
+        currentTrailRenderer = null;
+
+        if (effectData == null)
+            return;
+
+        // Particle SystemとTrail Rendererのどちらか片方だけ設定されているか確認
+        bool hasParticle = effectData.particlePrefab != null;
+        bool hasTrail = effectData.trailPrefab != null;
+
+        if (hasParticle == hasTrail)
+        {
+            Debug.LogWarning(
+                "Particle PrefabとTrail Prefabは、どちらか片方だけ設定してください。"
+            );
+            return;
+        }
+
+        Transform parent = effectAttachPoint != null
+            ? effectAttachPoint
+            : transform;
+
+        if (hasParticle)
+        {
+            // Particle Systemを装備
+            currentEffectObject = Instantiate(
+                effectData.particlePrefab.gameObject,
+                parent
+            );
+
+            currentParticleSystem =
+                currentEffectObject.GetComponent<ParticleSystem>();
+
+            // 装備直後は停止し、移動中に再生する
+            if (currentParticleSystem != null)
+            {
+                currentParticleSystem.Stop(
+                    true,
+                    ParticleSystemStopBehavior.StopEmittingAndClear
+                );
+            }
+        }
+        else
+        {
+            // Trail Rendererを装備
+            currentEffectObject = Instantiate(
+                effectData.trailPrefab.gameObject,
+                parent
+            );
+
+            currentTrailRenderer =
+                currentEffectObject.GetComponent<TrailRenderer>();
+
+            if (currentTrailRenderer != null)
+            {
+                currentTrailRenderer.emitting = false;
+                currentTrailRenderer.Clear();
+            }
+        }
+
+        currentEffectObject.transform.localPosition = Vector3.zero;
+        currentEffectObject.transform.localRotation = Quaternion.identity;
+    }
+
 }

@@ -11,37 +11,36 @@ public class EffectShopItem : MonoBehaviour
     [Header("ボタン")]
     [SerializeField] private Button unlockButton;
     [SerializeField] private Button useButton;
+    [SerializeField] private Button equippedButton;
 
     private EffectData effectData;
     private EffectShopManager shopManager;
 
-    public void Setup(
-        EffectData data,
-        EffectShopManager manager
-    )
+    public void Setup(EffectData data, EffectShopManager manager)
     {
         effectData = data;
         shopManager = manager;
 
-        // エフェクトのアイコンを設定
         if (iconImage != null)
             iconImage.sprite = data.icon;
 
-        // 開放ボタンに必要なトロフィー数を表示
         if (costText != null)
             costText.text = data.trophyCost.ToString();
 
-        // ボタンのイベントを設定
         unlockButton.onClick.RemoveAllListeners();
         useButton.onClick.RemoveAllListeners();
 
-        unlockButton.onClick.AddListener(
-            () => shopManager.UnlockEffect(effectData)
-        );
+        unlockButton.onClick.AddListener(() =>
+        {
+            shopManager.UnlockEffect(effectData);
+            shopManager.RefreshShop();
+        });
 
-        useButton.onClick.AddListener(
-            () => shopManager.EquipEffect(effectData)
-        );
+        useButton.onClick.AddListener(() =>
+        {
+            shopManager.EquipEffect(effectData);
+            shopManager.RefreshShop();
+        });
 
         Refresh();
     }
@@ -54,17 +53,18 @@ public class EffectShopItem : MonoBehaviour
         bool unlocked = shopManager.IsUnlocked(effectData);
         bool equipped = shopManager.IsEquipped(effectData);
 
-        // 開放済みなら開放ボタンを隠す
+        // 未解放ならアンロックボタンを表示
         unlockButton.gameObject.SetActive(!unlocked);
 
-        // 開放済みなら使用ボタンを表示
-        useButton.gameObject.SetActive(unlocked);
+        // 解放済みで、装備中でなければ装備ボタンを表示
+        useButton.gameObject.SetActive(unlocked && !equipped);
 
-        // トロフィーが足りない場合は購入不可
+        // 装備中なら装備中ボタンを表示
+        if (equippedButton != null)
+            equippedButton.gameObject.SetActive(unlocked && equipped);
+
+        // トロフィーが足りなければアンロックできない
         unlockButton.interactable =
             shopManager.TrophyCount >= effectData.trophyCost;
-
-        // 装備中は使用ボタンを押せない
-        useButton.interactable = !equipped;
     }
 }

@@ -3,8 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-using static RankingManager;
-using static UnityEngine.LowLevelPhysics2D.PhysicsLayers;
 
 public class GameClearManager : MonoBehaviour
 {
@@ -27,82 +25,59 @@ public class GameClearManager : MonoBehaviour
     [Header("プレイヤー名")]
     [SerializeField] private TMP_InputField playerNameInput;
 
-
     private bool isCleared = false;
     private bool SendRank = false;
-
-    private const string TrophyKey = "PlayerTrophyCount";
-
-    // 所持トロフィー数
-    public static int TrophyCount
-    {
-        get { return PlayerPrefs.GetInt(TrophyKey, 0); }
-    }
-
-    // トロフィーを1個獲得
-    private void AddTrophy()
-    {
-        int count = TrophyCount + 1;
-
-        PlayerPrefs.SetInt(TrophyKey, count);
-        PlayerPrefs.Save();
-
-        Debug.Log("トロフィー獲得！ 所持数：" + count);
-    }
 
     private void Start()
     {
         // 最初はリザルト画面を非表示
         if (resultPanel != null)
-        {
             resultPanel.SetActive(false);
-        }
     }
 
     public void ReturnToTitle()
     {
         if (SendRank)
             return;
+
         SendRank = true;
-        AudioManager.Instance.PlayClearSE();
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayClearSE();
+
         // 入力されたプレイヤー名を取得
-        string playerName = "";
+        string submittedPlayerName = "";
 
         if (playerNameInput != null)
-        {
-            playerName = playerNameInput.text;
-        }
+            submittedPlayerName = playerNameInput.text;
 
         // 名前が空の場合
-        if (string.IsNullOrWhiteSpace(playerName))
-        {
-            playerName = "noname";
-        }
+        if (string.IsNullOrWhiteSpace(submittedPlayerName))
+            submittedPlayerName = "noname";
 
         // クリアタイムを取得
         float clearTime = 0f;
 
         if (gameTimer != null)
-        {
             clearTime = gameTimer.ElapsedTime;
-        }
 
         // ランキング送信
-        StartCoroutine(SendRanking(playerName, clearTime));
+        StartCoroutine(SendRanking(submittedPlayerName, clearTime));
     }
 
-    //
     public void GameClear()
     {
         // すでにクリア済みなら何もしない
         if (isCleared)
             return;
 
-        SendRank=false;
+        SendRank = false;
         isCleared = true;
 
-        AddTrophy();
-        // クリアしたので、続きから用のセーブデータを削除
+        // クリア報酬としてトロフィーを1個獲得
+        TrophyManager.AddTrophies(1);
+
+        // 続きから用のセーブデータを削除
         PlayerPrefs.DeleteKey("GameSaveData");
         PlayerPrefs.Save();
 
@@ -112,12 +87,7 @@ public class GameClearManager : MonoBehaviour
         float clearTime = 0f;
 
         if (gameTimer != null)
-        {
             clearTime = gameTimer.ElapsedTime;
-        }
-
-
-
 
         // クリアタイムを表示
         if (clearTimeText != null)
@@ -132,15 +102,11 @@ public class GameClearManager : MonoBehaviour
 
         // リザルト画面を表示
         if (resultPanel != null)
-        {
             resultPanel.SetActive(true);
-        }
 
         // プレイヤー操作を停止
         if (player != null)
-        {
             player.SetInputPermission(false, false, false, false);
-        }
 
         // ゲームを停止
         Time.timeScale = 0f;
@@ -149,32 +115,13 @@ public class GameClearManager : MonoBehaviour
         Debug.Log("クリアタイム：" + clearTime);
     }
 
-
-    public static bool TrySpendTrophies(int amount)
-    {
-        if (amount < 0)
-            return false;
-
-        int currentCount = TrophyCount;
-
-        // 所持数が足りなければ購入できない
-        if (currentCount < amount)
-            return false;
-
-        // トロフィーを消費して保存
-        PlayerPrefs.SetInt(TrophyKey, currentCount - amount);
-        PlayerPrefs.Save();
-
-        return true;
-    }
-
-
-    private IEnumerator SendRanking(string playerName, float clearTime)
+    private IEnumerator SendRanking(
+        string submittedPlayerName,
+        float clearTime)
     {
         // GASへ送るデータ
         RankingData data = new RankingData();
-
-        data.playerName = playerName;
+        data.playerName = submittedPlayerName;
         data.clearTime = clearTime;
 
         // JSONに変換
@@ -183,15 +130,11 @@ public class GameClearManager : MonoBehaviour
         // JSONをバイトデータに変換
         byte[] body = System.Text.Encoding.UTF8.GetBytes(json);
 
-        // POSTリクエストを作成
         using (UnityWebRequest request =
             new UnityWebRequest(gasUrl, "POST"))
         {
-            request.uploadHandler =
-                new UploadHandlerRaw(body);
-
-            request.downloadHandler =
-                new DownloadHandlerBuffer();
+            request.uploadHandler = new UploadHandlerRaw(body);
+            request.downloadHandler = new DownloadHandlerBuffer();
 
             request.SetRequestHeader(
                 "Content-Type",
@@ -199,7 +142,7 @@ public class GameClearManager : MonoBehaviour
             );
 
             Debug.Log("ランキング送信開始！");
-            Debug.Log("名前：" + playerName);
+            Debug.Log("名前：" + submittedPlayerName);
             Debug.Log("タイム：" + clearTime);
 
             yield return request.SendWebRequest();
@@ -208,10 +151,11 @@ public class GameClearManager : MonoBehaviour
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(
-                    "ランキング送信失敗：" +
-                    request.error
+                    "ランキング送信失敗：" + request.error
                 );
 
+                // 送信に失敗した場合はリザルト画面に残る
+                SendRank = false;
                 yield break;
             }
 
@@ -223,8 +167,6 @@ public class GameClearManager : MonoBehaviour
             SceneManager.LoadScene("Title");
         }
     }
-
-
 
     [System.Serializable]
     private class RankingData

@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -7,12 +6,11 @@ public class EffectShopManager : MonoBehaviour
 {
     [Header("エフェクト一覧")]
     [SerializeField]
-    private List<EffectData> effects =
-        new List<EffectData>();
+    private List<EffectData> effects = new List<EffectData>();
 
     [Header("ショップUI")]
     [SerializeField] private Transform itemParent;
-    [SerializeField] private EffectShopItem itemPrefab;
+    [SerializeField] private GameObject itemTemplate;
     [SerializeField] private TMP_Text trophyCountText;
 
     private readonly List<EffectShopItem> shopItems =
@@ -21,7 +19,8 @@ public class EffectShopManager : MonoBehaviour
     private const string UnlockedKey = "EffectUnlocked_";
     private const string EquippedKey = "EquippedEffect";
 
-    public int TrophyCount => GameClearManager.TrophyCount;
+    // TrophyManagerから所持数を取得
+    public int TrophyCount => TrophyManager.TrophyCount;
 
     public string EquippedEffectId =>
         PlayerPrefs.GetString(EquippedKey, "");
@@ -32,48 +31,70 @@ public class EffectShopManager : MonoBehaviour
         RefreshShop();
     }
 
-    // エフェクト一覧をテンプレートから自動生成
+    // テンプレートを複製してショップのアイテムを作成
     private void BuildShop()
     {
-        foreach (Transform child in itemParent)
+        if (itemParent == null || itemTemplate == null)
         {
-            Destroy(child.gameObject);
+            Debug.LogError(
+                "Item ParentまたはItem Templateが未設定です。"
+            );
+            return;
         }
 
         shopItems.Clear();
+        itemTemplate.SetActive(false);
 
         foreach (EffectData data in effects)
         {
             if (data == null)
                 continue;
 
-            EffectShopItem item = Instantiate(
-                itemPrefab,
+            GameObject itemObject = Instantiate(
+                itemTemplate,
                 itemParent
             );
 
+            itemObject.name = "ShopItem_" + data.effectId;
+            itemObject.SetActive(true);
+
+            EffectShopItem item =
+                itemObject.GetComponent<EffectShopItem>();
+
+            if (item == null)
+            {
+                Debug.LogError(
+                    "UIItemTemplateにEffectShopItemがありません。"
+                );
+
+                Destroy(itemObject);
+                continue;
+            }
+
             item.Setup(data, this);
             shopItems.Add(item);
-
-            item.gameObject.SetActive(true);
         }
     }
 
-    // このエフェクトを開放済みか確認
+    // 開放済みか確認
     public bool IsUnlocked(EffectData data)
     {
+        if (data == null)
+            return false;
+
         return PlayerPrefs.GetInt(
             UnlockedKey + data.effectId, 0
         ) == 1;
     }
 
-    // このエフェクトを装備中か確認
+    // 装備中か確認
     public bool IsEquipped(EffectData data)
     {
-        return EquippedEffectId == data.effectId;
+        return data != null &&
+               EquippedEffectId == data.effectId;
     }
 
-    // トロフィーを消費して永久開放
+    // トロフィーを消費してエフェクトを開放
     public void UnlockEffect(EffectData data)
     {
         if (data == null || IsUnlocked(data))
@@ -82,9 +103,10 @@ public class EffectShopManager : MonoBehaviour
         if (data.trophyCost < 0)
             return;
 
-        if (!GameClearManager.TrySpendTrophies(data.trophyCost))
+        if (!TrophyManager.TrySpendTrophies(data.trophyCost))
         {
             Debug.Log("トロフィーが足りません！");
+            RefreshShop();
             return;
         }
 
@@ -94,7 +116,6 @@ public class EffectShopManager : MonoBehaviour
 
         PlayerPrefs.Save();
 
-        Debug.Log(data.effectName + "を開放しました！");
         RefreshShop();
     }
 
@@ -110,22 +131,53 @@ public class EffectShopManager : MonoBehaviour
 
         PlayerPrefs.Save();
 
-        Debug.Log(data.effectName + "を装備しました！");
         RefreshShop();
     }
 
-    // トロフィー数と各ボタンを更新
+    // 装備中のEffectDataを取得
+    public EffectData GetEquippedEffectData()
+    {
+        return effects.Find(data =>
+            data != null &&
+            data.effectId == EquippedEffectId
+        );
+    }
+
+    // 所持トロフィー数とアイテム表示を更新
     public void RefreshShop()
     {
         if (trophyCountText != null)
-        {
             trophyCountText.text = TrophyCount.ToString();
-        }
 
         foreach (EffectShopItem item in shopItems)
         {
             if (item != null)
                 item.Refresh();
         }
+    }
+
+    // ショップ状況をリセット
+    private void ResetShopData()
+    {
+        // トロフィー数を0にする
+        PlayerPrefs.SetInt("PlayerTrophyCount", 0);
+
+        // 装備中のエフェクトを解除
+        PlayerPrefs.DeleteKey("EquippedEffect");
+
+        // 解放状態をリセット
+        foreach (EffectData data in effects)
+        {
+            if (data != null)
+            {
+                PlayerPrefs.DeleteKey("EffectUnlocked_" + data.effectId);
+            }
+        }
+
+        PlayerPrefs.Save();
+
+        // ショップ表示を更新
+        RefreshShop();
+        Debug.Log("ショップ状況をリセットしました");
     }
 }

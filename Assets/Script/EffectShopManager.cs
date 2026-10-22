@@ -27,6 +27,7 @@ public class EffectShopManager : MonoBehaviour
 
     private void Start()
     {
+        ResetShopData();
         BuildShop();
         RefreshShop();
     }
@@ -160,7 +161,7 @@ public class EffectShopManager : MonoBehaviour
     private void ResetShopData()
     {
         // トロフィー数を0にする
-        PlayerPrefs.SetInt("PlayerTrophyCount", 0);
+        PlayerPrefs.SetInt("PlayerTrophyCount", 10);
 
         // 装備中のエフェクトを解除
         PlayerPrefs.DeleteKey("EquippedEffect");
